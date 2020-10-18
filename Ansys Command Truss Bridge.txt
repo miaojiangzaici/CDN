@@ -1,0 +1,128 @@
+/TITLE,tumu 19-1 Truss Bridge                 !指定标题  
+/COM,Structural                                   !选择分析类型为结构分析
+/PREP7                                          !进入前处理器
+ET,1,BEAM188                                   !定义1号单元类型
+KEYOPT,1,3,2
+ET,2,SHELL181                                  !定义2号单元类型
+KEYOPT,1,3,2
+
+MP,EX,1,2.1E11                                   !定义1号材料弹性模量
+MP,PRXY,1,0.3                                    !定义1号材料泊松比
+MP,DENS,1,7850                                  !定义1号材料密度
+MP,EX,2,3.5E10                                   !定义2号材料弹性模量
+MP,PRXY,2,0.1667                                 !定义2号材料泊松比
+MP,DENS,2,2500                                  !定义2号材料密度
+
+SECTYPE, 1, BEAM, I, , 0                       !定义1号工字形截面
+SECOFFSET, CENT                                !截面质心不偏移
+SECDATA,0.4,0.4,0.4,0.016,0.016,0.016,0,0,0,0          !1号截面参数
+SECTYPE, 2, BEAM, I, , 0                !定义2号工字形截面
+SECOFFSET, CENT                                ! 截面质心不偏移
+SECDATA,0.4,0.4,0.4,0.012,0.012,0.012,0,0,0,0          ! 2号截面参数
+SECTYPE, 3, BEAM, I, , 0                        ! 定义3号工字形截面
+SECOFFSET, CENT                                ! 截面质心不偏移
+SECDATA,0.3,0.3,0.4,0.012,0.012,0.012,0,0,0,0          ! 3号截面参数
+SECT,4,SHELL,,                         !定义4号壳厚度
+SECDATA, 0.3,2,0.0,1                   ! 4号壳参数
+
+
+N, ,0,0,-5, , , ,                                     !建立节点
+NGEN,4,4,ALL, , ,12, , ,1,                           !复制节点
+NGEN,2,1,ALL, , , , ,10,1,                           !复制节点
+NGEN,2,1,2,10,4, ,16, ,1,                            !复制节点
+NGEN,2,1,3,11,4, , ,-10,1,                           !复制节点
+
+TYPE,1                                          !选择1号单元类型
+MAT,1                                           !选择1号材料
+ESYS,0                                          !单元坐标系
+SECNUM,1                                      !选择1号截面
+TSHAP,LINE                                     !选择线形单元
+E,11,14                                          !建立单元
+E,12,13                                          !建立单元
+ 
+TYPE,1                                          ! 选择1号单元类型
+MAT,1                                           ! 选择1号材料
+ESYS,0                                          ! 单元坐标系
+SECNUM,2                                       ! 选择2号截面
+TSHAP,LINE                                     ! 选择线形单元
+E,2,6                                            !建立单元
+E,6,10                      
+E,10,14 
+E,1,5
+E,5,9
+E,9,13
+E,3,7
+E,7,11
+E,4,8
+E,8,12
+E,1,2
+E,3,4
+E,5,6
+E,7,8
+E,9,10
+E,11,12
+E,13,14
+
+TYPE,1                                        ! 选择1号单元类型
+MAT,1                                         ! 选择1号材料
+ESYS,0                                        ! 单元坐标系
+SECNUM,3                                    ! 选择3号截面
+TSHAP,LINE                                   ! 选择线形单元
+E,3,6                                          !建立单元
+E,6,11
+E,4,5 
+E,5,12
+E,2,3 
+E,1,4 
+E,6,7 
+E,5,8
+E,10,11 
+E,9,12 
+
+TYPE,2                                       ! 选择2号单元类型
+MAT,2                                        ! 选择2号材料
+ESYS,0                                       ! 单元坐标系
+SECNUM,   4                                    ! 选择4号截面
+TSHAP,QUAD                                 ! 选择四边形单元
+E,1,2,6,5                                      !建立单元
+E,5,6,10,9
+E,9,10,14,13 
+
+NSYM,X,14,ALL                                !所有节点以y0z平面对称
+ESYM, ,14,ALL                                 ! 所有单元以y0z平面对称
+NUMMRG,ALL, , , ,LOW                         !合并重复节点单元，编号取较小者
+NUMCMP,ALL                                      !压缩节点单元等编号
+FINISH                                             !结束前处理器
+
+/SOL                                              !进入求解器
+NSEL,S, , ,23,24                                     !选择节点
+D,ALL, ,0, , , ,UX,UY,UZ, , , ,                          !约束3个自由度
+NSEL,S, , ,13,14                                     !选择节点
+D,ALL, ,0, , , , ,UY,UZ, , , ,                             !约束两个自由度
+NSEL,S, , ,1,2                                        !选择节点
+F,ALL,FY,-10000                                     !施加竖向集中力荷载
+ALLSEL,ALL                                        !选择所有项目
+ACEL,0,10,0,                                        !施加重力
+ANTYPE,0                                          !选择分析类型，静力分析
+SOLVE                                             !开始求解
+FINISH                                             !结束求解器          
+
+/POST1                                             !进入普通后处理器
+PLDISP,2                                            !显示结构变形图      
+PLNSOL, U,SUM, 0,1.0                                !显示总位移云图      
+PLVECT,U, , , ,VECT,ELEM,ON,0                       !显示节点总位移矢量图
+                                                                         
+ETABLE,ZHOU_I,SMISC, 1                            !定义单元表，轴力    
+ETABLE,ZHOU_J,SMISC, 7                            !定义单元表，轴力    
+ETABLE,JIAN_I,SMISC, 2                             !定义单元表，剪力    
+ETABLE,JIAN_J,SMISC, 8                             !定义单元表，剪力    
+ETABLE,WAN_I,SMISC, 6                             !定义单元表，弯矩    
+ETABLE,WAN_J,SMISC, 12                            !定义单元表，弯矩    
+PRETAB,ZHOU_I,ZHOU_J,JIAN_I,JIAN_J,WAN_I,WAN_J  !列表显示单元结果表  
+PLLS,ZHOU_I,ZHOU_J,1,0                             !显示轴力图          
+PLLS,JIAN_I,JIAN_J,1,0                               !显示剪力图          
+PLLS,WAN_I,WAN_J,1,0                               !显示弯矩图          
+                                                                         
+PRNSOL,U,COMP                                   !列表显示节点位移    
+FINISH                                            !结束后处理器
+! /EXIT,ALL                                        !退出AVSYS并保存所有信息
